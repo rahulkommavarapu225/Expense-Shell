@@ -19,7 +19,7 @@ VALIDATE (){
        echo -e "$2......$R FAILURE $N"
        exit1
      else
-      echo -e "$2......$R SUCCESS $N"
+      echo -e "$2......$G SUCCESS $N"
     fi
 }
 # Check the Root access
