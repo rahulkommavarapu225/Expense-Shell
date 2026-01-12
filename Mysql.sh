@@ -48,3 +48,14 @@ VALIDATE $? "Starting Mysql-server"
 mysql_secure_installation  ---set--root---pass ExpenseAPP@1
 VALIDATE $? "setting root password"
  
+
+ mysql -h mysql.practice25.online -u root -pExpenseApp@1 -e "show databases;"
+
+ if [ $? -ne 0 ]
+  then
+   echo "Mysql root Password not setup " 
+   mysql_secure_installation --set--root--pass ExpenseAPP@1
+   VALIDATE $? "Setting Root Password"
+  else
+   echo -e "Mysql root Password already setup.....SKIPPING"
+  fi  
