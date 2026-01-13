@@ -13,6 +13,9 @@ LOG_FILE=$(echo $0 | cut -d "." -f1)
 TIMESTAMP=$(date +%y-%m-%d-%H-%M-%S)
 LOG_FILE_NAME="$LOGS_FOLDER/$LOG_FILE-$TIMESTAMP.log"
 
+mkdir -p "$LOGS_FOLDER"
+
+
 
 VALIDATE() {
     if [ $1 -ne 0 ]
@@ -34,7 +37,7 @@ CHECK_ROOT() {
 
 echo "Script Started executing at :$TIMESTAMP "
 
-dnf module disable nodejs -y &>>$LOG_FILE_NAME
+dnf module disable nodejs -y  &>>$LOG_FILE_NAME
 VALIDATE $? "Disabling existing default Nodejs"
 
 dnf module enable nodejs:20 -y &>>$LOG_FILE_NAME
