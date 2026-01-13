@@ -35,27 +35,25 @@ CHECK_ROOT (){
 
 echo "Script started executing at:$TIMESTAMP" & >>$LOG_FILE_NAME
 
-dnf install mysql-server -y 
+dnf install mysql-server -y  & >>$LOG_FILE_NAME
 VALIDATE $? "Installing mysql server"
 
-systemctl enable mysqld 
+systemctl enable mysqld & >>$LOG_FILE_NAME
 VALIDATE $? "Enabling the Mysql-server"
 
-systemctl start mysqld 
+systemctl start mysqld  & >>$LOG_FILE_NAME
 VALIDATE $? "Starting Mysql-server"
 
-# setting root-Password
-mysql_secure_installation  ---set--root---pass ExpenseAPP@1
-VALIDATE $? "setting root password"
+mysql -h mysql.Practice25.online -u root -pExpenseApp@1 -e 'show databases;' & >>$LOG_FILE_NAME
+
+if [ $? -ne 0 ]
+then
+   echo "Mysql Root password not setup" 
+   mysql_secure_installation --set-root-pass ExpenseApp@1 &>> $LOG_FILE_NAME
+   VALIDATE $? "Setting Root Password"   
+else
+  echo -e "Mysql Root Password already setup.....$Y SKIPPING $G"
+fi   
  
 
- mysql -h mysql.practice25.online -u root -pExpenseApp@1 -e "show databases;" &>>$LOG_FILE_NAME
-
- if [ $? -ne 0 ]
-  then
-   echo "Mysql root Password not setup " &>>$LOG_FILE_NAME
-   mysql_secure_installation --set--root--pass ExpenseAPP@1
-   VALIDATE $? "Setting Root Password"
-  else
-   echo -e "Mysql root Password already setup.....SKIPPING"
-  fi
+ 
