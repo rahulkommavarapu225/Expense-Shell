@@ -23,10 +23,18 @@ VALIDATE() {
      echo -e "$2......$R FAILURE $N"
      exit 1
     else
-    useradd expense  &>>$LOG_FILE_NAME
      echo -e "$2....$G Success $N"
     fi 
 }
+
+if [ id expense &>/dev/null ]
+then
+  echo -e "Expense user already exists... $Y SKIPPING $N" &>>$LOG_FILE_NAME
+else
+  useradd expense &>>$LOG_FILE_NAME
+  VALIDATE $? "Adding/Creating Expense User"
+fi
+
 
 CHECK_ROOT() {
     if [ $USERID -ne 0 ]
