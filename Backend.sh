@@ -8,7 +8,7 @@ G="\e[32m"
 Y="\e[33m"
 N="\e[34m"
 
-LOGS_FOLDER="/var/log/expense-logs"
+LOGS_FOLDER= "/var/log/expense-logs"
 LOG_FILE=$(echo $0 | cut -d "." -f1)
 TIMESTAMP=$(date +%y-%m-%d-%H-%M-%S)
 LOG_FILE_NAME="$LOGS_FOLDER/$LOG_FILE-$TIMESTAMP.log"
@@ -47,7 +47,8 @@ VALIDATE $? "Enableing Nodejs:20 "
 dnf install nodejs -y &>>$LOG_FILE_NAME
 VALIDATE $? "Installig nodejs"
 
-
+useradd expense &>>$LOG_FILE_NAME
+VALIDATE $? "Adding/Creating Expense User"
 
 mkdir /app &>>$LOG_FILE_NAME
 VALIDATE $? "Creating app Directory"
