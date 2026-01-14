@@ -7,17 +7,17 @@ G="\e[32m"
 Y="\e[33m"
 N="\e[34m"
 
-LOGS_FOLDER= "/var/log/expense-logs"
+LOGS_FOLDER="/var/log/expense-logs"
 LOG_FILE=$(echo $0 |cut -d "." -f1)
 TIMESTAMP=$(date +%y-%m-%d-%H-%M-%S)
 LOG_FILE_NAME="$LOGS_FOLDER/$LOG_FILE-$TIMESTAMP.log" 
 
-#VAlidate the Script of Mysqld
+#Validate the Script of Mysqld
 VALIDATE (){
    if [ $1 -ne 0 ] 
     then
        echo -e "$2......$R FAILURE $N"
-       exit1
+       exit 1
      else
       echo -e "$2......$G SUCCESS $N"
     fi
@@ -33,23 +33,24 @@ CHECK_ROOT (){
   fi
      }
 
-echo "Script started executing at:$TIMESTAMP" & >>$LOG_FILE_NAME
+echo "Script started executing at:$TIMESTAMP" &>>$LOG_FILE_NAME
 
-dnf install mysql-server -y  & >>$LOG_FILE_NAME
+dnf install mysql-server -y  &>>$LOG_FILE_NAME
 VALIDATE $? "Installing mysql server"
 
-systemctl enable mysqld & >>$LOG_FILE_NAME
+systemctl enable mysqld &>>$LOG_FILE_NAME
 VALIDATE $? "Enabling the Mysql-server"
 
-systemctl start mysqld  & >>$LOG_FILE_NAME
+systemctl start mysqld  &>>$LOG_FILE_NAME
 VALIDATE $? "Starting Mysql-server"
 
-mysql -h mysql.Practice25.online -u root -pExpenseApp@1 -e 'show databases;' & >>$LOG_FILE_NAME
+mysql -h mysql.Practice25.online -u root -p'ExpenseApp@1' -e 'show databases;' >> $LOG_FILE_NAME 2>&1
+
 
 if [ $? -ne 0 ]
 then
    echo "Mysql Root password not setup" 
-   mysql_secure_installation --set-root-pass ExpenseApp@1 &>> $LOG_FILE_NAME
+   mysql_secure_installation --set-root-pass ExpenseApp@1 &>>$LOG_FILE_NAME
    VALIDATE $? "Setting Root Password"   
 else
   echo -e "Mysql Root Password already setup.....$Y SKIPPING $G"
