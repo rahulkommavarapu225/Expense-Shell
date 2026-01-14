@@ -23,6 +23,7 @@ VALIDATE() {
      echo -e "$2......$R FAILURE $N"
      exit 1
     else
+    useradd expense  &>>$LOG_FILE_NAME
      echo -e "$2....$G Success $N"
     fi 
 }
