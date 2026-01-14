@@ -8,7 +8,7 @@ G="\e[32m"
 Y="\e[33m"
 N="\e[34m"
 
-LOGS_FOLDER="/var/log/expense-logs"
+LOGS_FOLDER="var/log/expense-logs"
 LOG_FILE=$(echo $0 | cut -d "." -f1)
 TIMESTAMP=$(date +%y-%m-%d-%H-%M-%S)
 LOG_FILE_NAME="$LOGS_FOLDER/$LOG_FILE-$TIMESTAMP.log"
@@ -69,7 +69,7 @@ cp /home/ec2-user/Expense-Shell/backend.service /etc/systemd/system/backend.serv
 dnf install mysql -y &>>$LOG_FILE_NAME
 VALIDATE $? "Installing Mysql Client"
 
- mysql -h mysql.practice25.online -uroot -pExpenseApp@1 < /app/schema/backend.sql &>>$LOG_FILE_NAME
+mysql -h mysql.practice25.online -uroot -pExpenseApp@1 < /app/schema/backend.sql &>>$LOG_FILE_NAME
 VALIDATE $? "Setting up the Transactions schema and Tables"
 
 
