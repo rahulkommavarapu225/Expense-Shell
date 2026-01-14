@@ -1,10 +1,14 @@
+
 [Unit]
-Description =Backend.Service
+Description=Backend Service
+After=network.target
 
 [Service]
 User=expense
-Environment=DB_HOST="mysql.practice25.online"
-ExecStart=/bin/node /app/index.js
+WorkingDirectory=/app
+Environment=DB_HOST=mysql.practice25.online
+ExecStart=/usr/bin/node index.js
+Restart=always
 SyslogIdentifier=Backend
 
 [Install]
