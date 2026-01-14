@@ -77,7 +77,8 @@ VALIDATE $? "Installing MySQL Client"
 
 # Load schema
 mysql -h mysql.practice25.online -uexpense -pExpenseApp@1 < /app/schema/backend.sql &>>$LOG_FILE_NAME
-VALIDATE $? "Setting up Transactions schema"
+VALIDATE $? "Setting up the Transactions schema and Tables"
+
 
 # Start backend service
 systemctl daemon-reload &>>$LOG_FILE_NAME
