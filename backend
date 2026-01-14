@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 USERID=$(id -u)
@@ -6,82 +5,88 @@ USERID=$(id -u)
 R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
-N="\e[34m"
+N="\e[0m"
 
 LOGS_FOLDER="/var/log/expense-logs"
 mkdir -p "$LOGS_FOLDER"
-LOG_FILE=$( echo $0 | cut -d "." -f1)
-TIMESTAMP=$(date +%y-%m-%d-%H-%M-%S)
+LOG_FILE=$(basename "$0" | cut -d "." -f1)
+TIMESTAMP=$(date +%Y-%m-%d-%H-%M-%S)
 LOG_FILE_NAME="$LOGS_FOLDER/$LOG_FILE-$TIMESTAMP.log"
 
-
-
-
-
 VALIDATE() {
-    if [ $1 -ne 0 ]
-    then
-     echo -e "$2......$R FAILURE $N"
-     exit 1
-    else
-     echo -e "$2....$G Success $N"
-    fi 
+  if [ $1 -ne 0 ]; then
+    echo -e "$2 ...... $R FAILURE $N"
+    exit 1
+  else
+    echo -e "$2 ...... $G SUCCESS $N"
+  fi
 }
-
 
 CHECK_ROOT() {
-    if [ $USERID -ne 0 ]
-    then
-      echo "ERROR:: you must have sudo access to execute this Script"
-      exit 1
-    fi
+  if [ $USERID -ne 0 ]; then
+    echo -e "$R ERROR:: Please run this script as root $N"
+    exit 1
+  fi
 }
 
-echo "Script Started executing at :$TIMESTAMP "
+# ---------------- MAIN ----------------
 
-dnf module disable nodejs -y  &>>$LOG_FILE_NAME 
-VALIDATE $? "Disabling existing default Nodejs"
+CHECK_ROOT
 
-dnf module enable nodejs:20 -y &>>$LOG_FILE_NAME 
-VALIDATE $? "Enableing Nodejs:20 "
+echo "Script Started executing at : $TIMESTAMP" &>>$LOG_FILE_NAME
 
-dnf install nodejs -y &>>$LOG_FILE_NAME 
-VALIDATE $? "Installig nodejs"
+dnf module disable nodejs -y &>>$LOG_FILE_NAME
+VALIDATE $? "Disabling existing default NodeJS"
 
-useradd expense &>>$LOG_FILE_NAME 
-VALIDATE $? "Adding /Creating the expense user "
+dnf module enable nodejs:20 -y &>>$LOG_FILE_NAME
+VALIDATE $? "Enabling NodeJS 20"
 
-mkdir /app &>>$LOG_FILE_NAME 
-VALIDATE $? "Creating app Directory"
+dnf install nodejs -y &>>$LOG_FILE_NAME
+VALIDATE $? "Installing NodeJS"
 
-curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip  &>>$LOG_FILE_NAME
+# Create expense user (safe)
+id expense &>/dev/null || useradd expense &>>$LOG_FILE_NAME
+VALIDATE $? "Adding / Verifying expense user"
+
+# Create app directory safely
+mkdir -p /app &>>$LOG_FILE_NAME
+VALIDATE $? "Creating /app directory"
+
+curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip &>>$LOG_FILE_NAME
 VALIDATE $? "Downloading Backend"
 
-cd /app  #Change the App Directory
+cd /app || exit 1
 
-unzip /tmp/backend.zip &>>$LOG_FILE_NAME 
-VALIDATE $? "Unzip Backend"
+unzip -o /tmp/backend.zip &>>$LOG_FILE_NAME
+VALIDATE $? "Unzipping Backend"
 
-npm install &>>$LOG_FILE_NAME 
-VALIDATE $? "Installing Dependencies"
+npm install &>>$LOG_FILE_NAME
+VALIDATE $? "Installing Backend Dependencies"
 
-cp /home/ec2-user/Expense-Shell/backend.service /etc/systemd/system/backend.service
-VALIDATE $? "Copying Backend Service File"
+# Fix permissions
+chown -R expense:expense /app
+VALIDATE $? "Setting ownership for /app"
 
-#Prepare Mysql Schema
+# Copy service file
+cp /home/ec2-user/Expense-Shell/backend.service /etc/systemd/system/backend.service &>>$LOG_FILE_NAME
+VALIDATE $? "Copying backend.service file"
 
-dnf install mysql -y &>>$LOG_FILE_NAME 
-VALIDATE $? "Installing Mysql Client"
+# Install MySQL client
+dnf install mysql -y &>>$LOG_FILE_NAME
+VALIDATE $? "Installing MySQL Client"
 
-mysql -h mysql.practice25.online -uroot -pExpenseApp@1 < /app/schema/backend.sql &>>$LOG_FILE_NAME 
-VALIDATE $? "Setting up the Transactions schema and Tables"
+# Load schema
+mysql -h mysql.practice25.online -uroot -pExpenseApp@1 < /app/schema/backend.sql &>>$LOG_FILE_NAME
+VALIDATE $? "Setting up Transactions schema"
 
+# Start backend service
+systemctl daemon-reload &>>$LOG_FILE_NAME
+VALIDATE $? "Daemon reload"
 
-systemctl daemon-reload &>>$LOG_FILE_NAME 
-VALIDATE $? "Daemon-reload"
+systemctl enable backend &>>$LOG_FILE_NAME
+VALIDATE $? "Enabling Backend service"
 
-systemctl enable backend &>>$LOG_FILE_NAME 
-VALIDATE $? "Enabling Backend"
+systemctl restart backend &>>$LOG_FILE_NAME
+VALIDATE $? "Starting Backend service"
 
-systemctl start backend &>>$LOG_FILE_NAME 
-VALIDATE $? "Starting Backend"
+echo -e "$G Backend Installation Completed Successfully $N"
