@@ -13,7 +13,7 @@ LOG_FILE=$(echo $0 | cut -d "." -f1)
 TIMESTAMP=$(date +%y-%m-%d-%H-%M-%S)
 LOG_FILE_NAME="$LOGS_FOLDER/$LOG_FILE-$TIMESTAMP.log"
 
-mkdir -p "$LOGS_FOLDER"
+
 
 
 
@@ -26,14 +26,6 @@ VALIDATE() {
      echo -e "$2....$G Success $N"
     fi 
 }
-
-if [ id expense &>/dev/null ]
-then
-  echo -e "Expense user already exists... $Y SKIPPING $N" &>>$LOG_FILE_NAME
-else
-  useradd expense &>>$LOG_FILE_NAME
-  VALIDATE $? "Adding/Creating Expense User"
-fi
 
 
 CHECK_ROOT() {
