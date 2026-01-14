@@ -8,7 +8,7 @@ G="\e[32m"
 Y="\e[33m"
 N="\e[34m"
 
-LOGS_FOLDER="var/log/expense-logs"
+LOGS_FOLDER="/var/log/expense-logs"
 LOG_FILE=$(echo $0 | cut -d "." -f1)
 TIMESTAMP=$(date +%y-%m-%d-%H-%M-%S)
 LOG_FILE_NAME="$LOGS_FOLDER/$LOG_FILE-$TIMESTAMP.log"
@@ -63,7 +63,7 @@ VALIDATE $? "Unzip Backend"
 npm install &>>$LOG_FILE_NAME
 VALIDATE $? "Installing Dependencies"
 
-cp /home/ec2-user/Expense-Shell/backend.service/etc/systemd/system/backend.service
+cp /home/ec2-user/Expense-Shell/backend.service /etc/systemd/system/backend.service
 #Prepare Mysql Schema
 
 dnf install mysql -y &>>$LOG_FILE_NAME
