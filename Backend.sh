@@ -53,7 +53,7 @@ VALIDATE $? "Adding /Creating the expense user "
 mkdir /app &>>$LOG_FILE_NAME || true
 VALIDATE $? "Creating app Directory"
 
-curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip  &>>$LOG_FILE_NAME
+curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip  &>>$LOG_FILE_NAME || true
 VALIDATE $? "Downloading Backend"
 
 cd /app  #Change the App Directory
