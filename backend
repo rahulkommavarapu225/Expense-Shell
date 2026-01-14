@@ -76,7 +76,7 @@ dnf install mysql -y &>>$LOG_FILE_NAME
 VALIDATE $? "Installing MySQL Client"
 
 # Load schema
-mysql -h mysql.practice25.online -uroot -pExpenseApp@1 < /app/schema/backend.sql &>>$LOG_FILE_NAME
+mysql -h mysql.practice25.online -uexpense -pExpenseApp@1 < /app/schema/backend.sql &>>$LOG_FILE_NAME
 VALIDATE $? "Setting up Transactions schema"
 
 # Start backend service
