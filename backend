@@ -65,7 +65,7 @@ VALIDATE $? "Unzip Backend"
 npm install &>>$LOG_FILE_NAME || true
 VALIDATE $? "Installing Dependencies"
 
-cp /home/ec2-user/Expense-Shell/backend.service /etc/systemd/system/backend.services 
+cp /home/ec2-user/Expense-Shell/backend.service /etc/systemd/system/backend.service
 
 #Prepare Mysql Schema
 

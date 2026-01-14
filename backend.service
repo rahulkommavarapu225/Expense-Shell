@@ -8,4 +8,4 @@ ExecStart=/bin/node/app/index.js
 SyslogIdentifier=Backend
 
 [Install]
-Wanted By=Multi-User.target
+Wanted By=multi-user.target
