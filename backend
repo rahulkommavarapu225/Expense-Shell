@@ -5,89 +5,86 @@ USERID=$(id -u)
 R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
-N="\e[0m"
+N="\e[34m"
+
+#Create the Log Folder
 
 LOGS_FOLDER="/var/log/expense-logs"
-mkdir -p "$LOGS_FOLDER"
-LOG_FILE=$(basename "$0" | cut -d "." -f1)
-TIMESTAMP=$(date +%Y-%m-%d-%H-%M-%S)
-LOG_FILE_NAME="$LOGS_FOLDER/$LOG_FILE-$TIMESTAMP.log"
+LOG_FILE=$(echo $0 |cut -d "." -f1)
+TIMESTAMP=$(date +%y-%m-%d-%H-%M-%S)
+LOG_FILE_NAME="$LOGS_FOLDER/$LOG_FILE-$TIMESTAMP.log" 
 
-VALIDATE() {
-  if [ $1 -ne 0 ]; then
-    echo -e "$2 ...... $R FAILURE $N"
-    exit 1
-  else
-    echo -e "$2 ...... $G SUCCESS $N"
-  fi
+mkdir -p /var/log/expense-logs
+
+#Validate the Script of Mysqld
+VALIDATE (){
+   if [ $1 -ne 0 ] 
+    then
+       echo -e "$2......$R FAILURE $N"
+       exit 1
+     else
+      echo -e "$2......$G SUCCESS $N"
+    fi
 }
-
-CHECK_ROOT() {
-  if [ $USERID -ne 0 ]; then
-    echo -e "$R ERROR:: Please run this script as root $N"
-    exit 1
+# Check the Root access
+CHECK_ROOT (){   
+  if [ $USERID -ne 0 ]
+   then
+   echo "ERROR:: you must have Access to execute this script"
+   exit 1
+   else
+    echo "Continue the script"
   fi
-}
+     }
 
-# ---------------- MAIN ----------------
+     
+echo "Script started executing at:$TIMESTAMP" &>>$LOG_FILE_NAME
 
 CHECK_ROOT
+ 
+ dnf module disable nodejs -y &>>$LOG_FILE_NAME
+ VALIDATE $? "Disabling exiting default Nodejs"
 
-echo "Script Started executing at : $TIMESTAMP" &>>$LOG_FILE_NAME
+ dnf module enable nodejs:20 -y &>>$LOG_FILE_NAME
+ VALIDATE $? "Enabling the Nodejs 20"
 
-dnf module disable nodejs -y &>>$LOG_FILE_NAME
-VALIDATE $? "Disabling existing default NodeJS"
+ dnf install nodejs -y &>>$LOG_FILE_NAME
+ VALIDATE $? "Installing Nodejs"
 
-dnf module enable nodejs:20 -y &>>$LOG_FILE_NAME
-VALIDATE $? "Enabling NodeJS 20"
+ useradd expense  &>>$LOG_FILE_NAME
+VALIDATE $? "Adding /Creating Expense User"
 
-dnf install nodejs -y &>>$LOG_FILE_NAME
-VALIDATE $? "Installing NodeJS"
+mkdir /app  &>>$LOG_FILE_NAME
+VALIDATE $? "Creating App Directory"
 
-# Create expense user (safe)
-id expense &>/dev/null || useradd expense &>>$LOG_FILE_NAME
-VALIDATE $? "Adding / Verifying expense user"
+curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend=v2.zip &>>$LOG_FILE_NAME
+VALIDATE $? "Downloading the Backend"
 
-# Create app directory safely
-mkdir -p /app &>>$LOG_FILE_NAME
-VALIDATE $? "Creating /app directory"
+cd /app &>>$LOG_FILE_NAME
 
-curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip &>>$LOG_FILE_NAME
-VALIDATE $? "Downloading Backend"
+unzip /tmp/backend.zip &>>$LOG_FILE_NAME
+VALIDATE $? "Unzip The Backend"
 
-cd /app || exit 1
+npm install  &>>$LOG_FILE_NAME
+VALIDATE $? "Installing Dependencies"
 
-unzip -o /tmp/backend.zip &>>$LOG_FILE_NAME
-VALIDATE $? "Unzipping Backend"
+cp /home/ec2-user/Expense-Shell/backend/backend.service /etc/systemd/system/backend.service &>>$LOG_FILE_NAME
 
-npm install &>>$LOG_FILE_NAME
-VALIDATE $? "Installing Backend Dependencies"
-
-# Fix permissions
-chown -R expense:expense /app
-VALIDATE $? "Setting ownership for /app"
-
-# Copy service file
-cp /home/ec2-user/Expense-Shell/backend.service /etc/systemd/system/backend.service &>>$LOG_FILE_NAME
-VALIDATE $? "Copying backend.service file"
-
-# Install MySQL client
+# Prepare Mysql schema
 dnf install mysql -y &>>$LOG_FILE_NAME
-VALIDATE $? "Installing MySQL Client"
+VALIDATE $? "Insatlling mysql client"
 
-# Load schema
-mysql -h mysql.practice25.online -uexpense -pExpenseApp@1 < /app/schema/backend.sql &>>$LOG_FILE_NAME
-VALIDATE $? "Setting up the Transactions schema and Tables"
+mysql -h mysql.practice25.online -uroot -pExpenseApp@1 < /app/schema/backend.sql &>>$LOG_FILE_NAME
+VALIDATE $? "Setting up the Transactions Sachema and Tables"
 
-
-# Start backend service
-systemctl daemon-reload &>>$LOG_FILE_NAME
-VALIDATE $? "Daemon reload"
+systemctl daemon-reload  &>>$LOG_FILE_NAME
+VALIDATE $? "Daemon-relaod"
 
 systemctl enable backend &>>$LOG_FILE_NAME
-VALIDATE $? "Enabling Backend service"
+VALIDATE $? "Enabling Backend"
 
-systemctl restart backend &>>$LOG_FILE_NAME
-VALIDATE $? "Starting Backend service"
+systemctl start backend &>>$LOG_FILE_NAME
+VALIDATE $? "Start Backend"
 
-echo -e "$G Backend Installation Completed Successfully $N"
+
+
