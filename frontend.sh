@@ -46,13 +46,13 @@ VALIDATE $? "Enabling nginx-server"
 systemctl restart nginx  &>>$LOG_FILE_NAME
 VALIDATE $? "restart Nginx"
 
-rm -rf /usr/share/nginx/html*  &>>$LOG_FILE_NAME
+rm -rf /usr/share/nginx/html/*  &>>$LOG_FILE_NAME
 VALIDATE $? "Removing Exiting Version of code"
 
 curl -o /tmp/frontend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-frontend-v2.zip  &>>$LOG_FILE_NAME
 VALIDATE $? "Downloading latest code"
 
-cd /usr/share/nginx/html 
+cd  /usr/share/nginx/html  
 VALIDATE $? "Moving to HTML Directory"
 
 unzip /tmp/frontend.zip  &>>$LOG_FILE_NAME
