@@ -44,7 +44,9 @@ systemctl enable nginx  &>>$LOG_FILE_NAME
 VALIDATE $? "Enabling nginx-server"
 
 systemctl start nginx  &>>$LOG_FILE_NAME
-VALIDATE $? "restart Nginx"
+VALIDATE $? "Starting Nginx Server"
+
+mkdir -p /usr/share/nginx/html
 
 rm -rf /usr/share/nginx/html/*  &>>$LOG_FILE_NAME
 VALIDATE $? "Removing Exiting Version of code"
