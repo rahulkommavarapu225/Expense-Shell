@@ -33,12 +33,12 @@ CHECK_ROOT (){
   fi
      }
 
-echo "Script started executing at:$TIMESTAMP" &>>$LOG_FILE_NAME
+    echo "Script started executing at:$TIMESTAMP" &>>$LOG_FILE_NAME
   
 CHECK_ROOT
 
-dnf install mysql-server -y  &>>$LOG_FILE_NAME
-VALIDATE $? "Installing mysql server"
+ dnf install mysql-server -y  &>>$LOG_FILE_NAME
+ VALIDATE $? "Installing mysql server"
 
 systemctl enable mysqld &>>$LOG_FILE_NAME
 VALIDATE $? "Enabling the Mysql-server"
@@ -51,7 +51,7 @@ mysql -h mysql.practice25.online -u root -p'ExpenseApp@1' -e 'show databases;' >
 
 if [ $? -ne 0 ]
 then
-   echo "Mysql Root password not setup" 
+   echo "Mysql Root password not setup"  
    mysql_secure_installation --set-root-pass ExpenseApp@1 &>>$LOG_FILE_NAME
    VALIDATE $? "Setting Root Password"   
 else
